@@ -627,8 +627,12 @@ async function autofillFind(
 		hasOtp?: boolean;
 	};
 	if (!autofillSessionOwnerIsCurrent(owner)) return { ok: false, error: "unavailable" };
-	const result = queryResult(hostname, hasLogin !== false, hasCard === true, hasOtp === true);
-	if (result.locked) return { ok: true, data: result };
+	if (!currentIndex() || vaultLocked()) {
+		return {
+			ok: true,
+			data: queryResult(hostname, hasLogin !== false, hasCard === true, hasOtp === true),
+		};
+	}
 	await scheduleAutoLock();
 	if (!autofillSessionOwnerIsCurrent(owner)) return { ok: false, error: "unavailable" };
 	// Construct the summary after the final await/check, matching the secret-fetch ordering.

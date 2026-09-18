@@ -1,9 +1,19 @@
 import type { IndexEntry, LoginIndexEntry, SubdomainMatchMode } from "@core/adapters/autofill";
 import { etld1 } from "./etld1";
 
-/** eTLD+1 of a hostname; falls back to the raw input for IPs / unknown TLDs. */
+const domainCache = new Map<string, string>();
+const MAX_DOMAIN_CACHE = 2048;
+
+/** eTLD+1 of a hostname; falls back to the raw input for IPs / unknown TLDs. Memoized:
+ * the full-PSL lookup is the expensive part of every match, and the same handful of
+ * hostnames is asked for on every query. */
 export function registrableDomain(hostname: string): string {
-	return etld1(hostname) ?? hostname;
+	const cached = domainCache.get(hostname);
+	if (cached !== undefined) return cached;
+	const domain = etld1(hostname) ?? hostname;
+	if (domainCache.size >= MAX_DOMAIN_CACHE) domainCache.clear();
+	domainCache.set(hostname, domain);
+	return domain;
 }
 
 /** Just the fields the hostname policy reads; any LoginIndexEntry satisfies it. */
