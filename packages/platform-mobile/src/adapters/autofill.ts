@@ -105,9 +105,8 @@ const isIos = Capacitor.getPlatform() === "ios";
 // VEK and can't decrypt the bundle. (readVaultBlob(undefined) falls back to the first/only
 // vault, matching sync-manager's activeVaultId.) Non-secret (the wrappedVek stays
 // AES-encrypted). Returns undefined for a passwordless vault or an unreadable blob.
-async function readPasswordSlot(): Promise<SlotPayload | undefined> {
+async function readPasswordSlot(activeId: string | undefined): Promise<SlotPayload | undefined> {
 	try {
-		const activeId = await mobileStorage.getMeta<string>(ACTIVE_VAULT_KEY);
 		const slot = findPasswordSlot(decodeVaultBlob(await mobileStorage.readVaultBlob(activeId)));
 		if (!slot) return undefined;
 		return {
@@ -198,14 +197,16 @@ export const mobileAutofill: AutofillAdapter = {
 			userName: p.userName,
 			userHandle: p.userHandle,
 		}));
+		// The active vault id is needed twice below (bundle attribution + slot lookup); one read.
+		const activeId = await mobileStorage.getMeta<string>(ACTIVE_VAULT_KEY);
 		await Bridge.sync({
 			iv: enc.iv,
 			ciphertext: enc.ciphertext,
 			// Which vault this bundle was encrypted for. The extension will only offer its cached-VEK
 			// unlock when this matches the vault that VEK was armed for; the mirror is un-suffixed and
 			// outlives both the vault and the install, so without this it opens onto an aead error.
-			vaultId: (await mobileStorage.getMeta<string>(ACTIVE_VAULT_KEY)) ?? "",
-			slot: await readPasswordSlot(),
+			vaultId: activeId ?? "",
+			slot: await readPasswordSlot(activeId),
 			identities,
 			oneTimeCodeIdentities,
 			passkeyIv: encPk.iv,
