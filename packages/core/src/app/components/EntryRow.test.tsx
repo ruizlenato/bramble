@@ -25,6 +25,7 @@ function renderRow({ target = "chromium", ...props }: RowOverrides = {}) {
 		<I18nProvider i18n={i18n}>
 			<PlatformProvider platform={platformFor(target)}>
 				<EntryRow
+					id="e1"
 					name="GitHub"
 					secondary="octocat"
 					icon={KeyRound}
