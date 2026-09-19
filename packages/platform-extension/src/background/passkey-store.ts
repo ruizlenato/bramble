@@ -11,6 +11,7 @@ import { decodeEntriesPayload } from "@core/sync";
 import { normalizeEntryData } from "@core/vault/entry-normalize";
 import type { PasskeyPlacement } from "@core/vault/passkey";
 import { type EncryptedEntry, encodeVaultBlob, type VaultBlob } from "@core/vault-format";
+import { CryptoDecryptIndexResultSchema } from "../crypto/messages";
 import { addLoginEntry } from "./autofill-index";
 import { sendToOffscreen } from "./offscreen-client";
 import { requireActiveVaultId } from "./session";
@@ -71,20 +72,28 @@ export async function loadDecryptedEntries(): Promise<Entry[]> {
 	if (!outer.ok || typeof outer.data !== "string") {
 		throw new Error(`outer decrypt failed: ${outer.error ?? "no data"}`);
 	}
-	const entries: Entry[] = [];
-	for (const enc of decodeEntriesPayload(outer.data).entries) {
-		const dec = await sendToOffscreen({
-			type: "CRYPTO_DECRYPT",
-			vaultId,
-			payload: {
+	const payload = decodeEntriesPayload(outer.data);
+	if (payload.entries.length === 0) return [];
+	const batch = await sendToOffscreen({
+		type: "CRYPTO_DECRYPT_INDEX",
+		vaultId,
+		payload: {
+			entries: payload.entries.map((enc) => ({
+				id: enc.id,
 				ciphertext: enc.ciphertext,
 				iv: enc.iv,
 				wrappedDek: enc.wrappedDek,
 				dekIv: enc.dekIv,
-			},
-		});
-		if (!dec.ok || typeof dec.data !== "string") continue;
-		entries.push({ ...normalizeEntryData(JSON.parse(dec.data)), id: enc.id });
+			})),
+		},
+	});
+	if (!batch.ok) throw new Error(`entry decrypt failed: ${batch.error ?? "no data"}`);
+	const parsed = CryptoDecryptIndexResultSchema.safeParse(batch.data);
+	if (!parsed.success) throw new Error("entry decrypt failed: malformed batch result");
+	const entries: Entry[] = [];
+	for (const result of parsed.data) {
+		if (result.plaintext === null) continue;
+		entries.push({ ...normalizeEntryData(JSON.parse(result.plaintext)), id: result.id });
 	}
 	return entries;
 }
