@@ -25,11 +25,6 @@ export async function nextStamp(): Promise<Hlc> {
 	return (await getClock()).send();
 }
 
-/** Advance the background clock past a stamp read from disk. */
-export async function witnessStamp(hlc: Hlc): Promise<void> {
-	(await getClock()).witness(hlc);
-}
-
 /** Advance the background clock past every one of these stamps. */
 export async function witnessStamps(stamps: Hlc[]): Promise<void> {
 	const clock = await getClock();

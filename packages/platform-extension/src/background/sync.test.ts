@@ -30,7 +30,7 @@ vi.mock("./router", () => ({
 	setReady: vi.fn(),
 }));
 vi.mock("../offscreen-core", () => ({ setSyncBridge: vi.fn() }));
-vi.mock("./sync-clock", () => ({ witnessStamp: vi.fn(async () => {}), witnessStamps: vi.fn() }));
+vi.mock("./sync-clock", () => ({ witnessStamps: vi.fn() }));
 
 // chrome stub with local + session storage, alarms, and runtime (./sync adds a status listener at
 // import). No `offscreen` key -> the code treats the host as suspend-y and arms the keepalive alarm.

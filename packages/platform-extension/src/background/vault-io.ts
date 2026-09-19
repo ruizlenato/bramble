@@ -11,7 +11,7 @@ import { decodeVaultBlob, type EncryptedEntry, type VaultBlob } from "@core/vaul
 import { api } from "../platform-api";
 import { extensionStorage } from "../storage";
 import { sendToOffscreen } from "./offscreen-client";
-import { witnessStamp } from "./sync-clock";
+import { witnessStamps } from "./sync-clock";
 
 // Re-exported so existing background importers keep their import site.
 export { base64ToBytes, bytesToBase64 };
@@ -54,8 +54,10 @@ export async function reencryptOuterWithEntryChange(
 		payload = decodeEntriesPayload(decrypted.data);
 	}
 	// Keep the background clock ahead of every stamp already on disk.
-	for (const e of payload.entries) await witnessStamp(e.hlc);
-	for (const t of payload.tombstones) await witnessStamp(t.hlc);
+	await witnessStamps([
+		...payload.entries.map((e) => e.hlc),
+		...payload.tombstones.map((t) => t.hlc),
+	]);
 	const mutated = await mutate(payload.entries);
 	// Spread the payload rather than naming its fields: the mutate callbacks only add and
 	// replace entries, so everything else has to survive verbatim. Naming them dropped
