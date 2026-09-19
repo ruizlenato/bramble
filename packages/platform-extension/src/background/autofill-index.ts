@@ -686,7 +686,7 @@ async function autofillQuery(
 		// Ride along on the query the page already makes: the signup suggestion is drawn the
 		// moment this response lands, so a separate request for it would race the paint and lose.
 		// Offered locked as well as unlocked, since generating needs no vault.
-		if (hasLogin) result.generated = await generateSuggestion();
+		//
 		// Whether an alias row may be offered, decided here for the same reason the master switch
 		// is: a content script is not a trusted context, so the page does not get to assert that a
 		// provider exists. A config read only; nothing is contacted to answer it.
@@ -695,7 +695,12 @@ async function autofillQuery(
 		// on lock), so the question softens to whether any vault has one. All it buys there is an
 		// unlock row on a signup form's email field, which is the way to the alias.
 		if (hasLogin) {
-			result.aliasReady = result.locked ? await aliasConfiguredAnywhere() : await aliasAvailable();
+			const [generated, aliasReady] = await Promise.all([
+				generateSuggestion(),
+				result.locked ? aliasConfiguredAnywhere() : aliasAvailable(),
+			]);
+			result.generated = generated;
+			result.aliasReady = aliasReady;
 		}
 		// Sliding session: any autofill activity extends the timer.
 		if (!result.locked) await scheduleAutoLock();
