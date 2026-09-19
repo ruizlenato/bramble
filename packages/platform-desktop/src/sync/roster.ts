@@ -231,12 +231,17 @@ async function startRoster(): Promise<void> {
 		},
 	} satisfies Parameters<typeof startRosterSync>[0];
 
-	rosterSessions = [
-		await startRosterSync(common),
-		// Browsers paired to this app, over the pipe they already have. Started second so a relay
-		// failure does not cost the local peers, which are the ones that work offline.
-		await startRosterSync({ ...common, peerSource: linkPeerSource }),
-	];
+	// Browsers paired to this app, over the pipe they already have. Started together, kept
+	// independently: a relay outage must not cost the local peers, which are the ones that
+	// work offline. A transport that fails is reported and retried on the next unlock.
+	const settled = await Promise.allSettled([
+		startRosterSync(common),
+		startRosterSync({ ...common, peerSource: linkPeerSource }),
+	]);
+	rosterSessions = settled.flatMap((s) => (s.status === "fulfilled" ? [s.value] : []));
+	for (const s of settled) {
+		if (s.status === "rejected") report(`sync: ${(s.reason as Error).message}`);
+	}
 }
 
 async function maybeStartRosterSync(): Promise<void> {
