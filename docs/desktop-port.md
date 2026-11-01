@@ -754,6 +754,23 @@ which only matters for machines other than the one that built it.
 binary's code signature, so an unsigned build looks like a different application on every build
 and prompts for the login password. See risk 5.
 
+### Window decorations, per platform
+
+The main window on Windows runs without native decorations. The caption strip is drawn in the
+webview: 32px, transparent, window controls only. What `set_decorations(false)` removes is the
+drawn frame and nothing else. tao 0.35 leaves `WS_CAPTION` and `WS_THICKFRAME` on the window, so
+resize borders, the Win11 rounded corners and shadow, and drag and Win+arrow snap all stay.
+
+macOS keeps its traffic lights but adopts the overlay titlebar: `titleBarStyle: "Overlay"` on
+`main` runs the webview edge to edge under them, and the strip mounts there without controls as
+the spacer that keeps content clear of the lights.
+`[unverified: the macOS overlay was implemented from the config schema and has not been run]`
+
+The control labels ride the same Lingui catalogs as the app, so a translated build gets
+translated labels from the existing string source.
+
+Linux keeps its native decorations. There was simply no reason to change that for now.
+
 ## Filling from the panel
 
 Enter in the quick-access panel fills the form in the browser. The app hands over the ONE
