@@ -864,6 +864,7 @@ msgid "Clock"
 msgstr "Relógio"
 
 #: packages/core/src/app/components/ui/modal.tsx
+#: packages/core/src/app/components/WindowTitleBar.tsx
 #: packages/core/src/app/screens/Restore/RestoreShell.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 #: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
@@ -2130,6 +2131,14 @@ msgstr "Senha mestre atualizada."
 msgid "Matching tags"
 msgstr "Tags correspondentes"
 
+#: packages/core/src/app/components/WindowTitleBar.tsx
+msgid "Maximize"
+msgstr "Maximizar"
+
+#: packages/core/src/app/components/WindowTitleBar.tsx
+msgid "Minimize"
+msgstr "Minimizar"
+
 #: packages/core/src/app/screens/Settings/components/AppearanceSection.tsx
 msgid "Mode"
 msgstr "Modo"
@@ -2846,6 +2855,7 @@ msgid "Resetting invalidates your old code."
 msgstr "A redefinição invalida seu código antigo."
 
 #: packages/core/src/app/bulk-actions/archive.tsx
+#: packages/core/src/app/components/WindowTitleBar.tsx
 #: packages/core/src/app/screens/EntryDetail/EntryDetail.tsx
 #: packages/core/src/app/screens/Settings/components/DataSection.tsx
 msgid "Restore"
