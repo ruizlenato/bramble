@@ -44,3 +44,17 @@ textarea,
 [data-selectable] {
 	user-select: text;
 }
+
+/*
+ * The in-app caption strip takes 32px of the column, and the shells still root with
+ * h-screen / min-h-screen. Providers above them render no DOM, so a shell root is the first
+ * element inside .app-frame and remapping those two utilities is exact. Dormant where
+ * .app-frame never mounts.
+ */
+.app-frame > .h-screen {
+	height: 100%;
+}
+
+.app-frame > .min-h-screen {
+	min-height: 100%;
+}

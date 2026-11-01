@@ -10,6 +10,8 @@ export * from "./adapters/shell";
 export * from "./adapters/storage";
 export { default as App, type PendingLogin } from "./app/App";
 export * from "./app/android-back";
+export { WindowTitleBar } from "./app/components/WindowTitleBar";
+export * from "./app/LocaleGate";
 export { default as OptionsApp } from "./app/OptionsApp";
 export * from "./context/PlatformContext";
 export * from "./flags";

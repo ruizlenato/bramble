@@ -163,6 +163,15 @@ pub fn run() {
             if let Some(window) = app.get_webview_window(spotlight::LABEL) {
                 spotlight::apply_backdrop(&window);
             }
+
+            // tao keeps WS_CAPTION and WS_THICKFRAME, so the frame under the webview-drawn
+            // caption stays native: resize, rounding, shadow, snap. Linux keeps its titlebar
+            // (a remapped one is dead there, see lifetime.rs), macOS its own.
+            #[cfg(target_os = "windows")]
+            if let Some(window) = app.get_webview_window(lifetime::MAIN) {
+                window.set_decorations(false)?;
+            }
+
             lifetime::install_tray(app.handle())?;
 
             // Updating in place. A password manager distributed outside an app store has no other
